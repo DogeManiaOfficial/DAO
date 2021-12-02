@@ -72,6 +72,8 @@
  * 1. Collects charity money
  * 2. Allows HODLers to propose a charity and vote
  * 3. Executes successful charity proposals
+ * 4. Any token or bnb coin can be exchanged for the DAO Token for using in charity purposes
+ * 5. Has no owner
  */
 
 // SPDX-License-Identifier: MIT
