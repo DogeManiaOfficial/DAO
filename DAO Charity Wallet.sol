@@ -106,7 +106,8 @@ interface IPancakeswapV2Router02 is IPancakeswapV2Router01 {
 
 contract DAOCharityWallet {
 
-  uint public nextcharityId;
+  uint public nextcharityId = 0;
+  uint public totalProposalsAmount = 0;
   address public DAOToken;
   IPancakeswapV2Router02 public immutable pancakeswapV2Router;
 
@@ -125,7 +126,7 @@ contract DAOCharityWallet {
   mapping(uint => CharityProposal) public charityproposals;
   
   modifier onlyHODLers() {
-    require(HODLers[msg.sender] == true, 'only HODLers');
+    require(HODLers[msg.sender] == true, 'Only HODLers!');
     _;
   }
 
@@ -142,7 +143,17 @@ contract DAOCharityWallet {
     address payable recipient) 
     public 
     onlyHODLers() {
-    require(IBEP20(DAOToken).balanceOf(address(this)) >= amount, 'Amount too big');
+    require(amount > 0, 'Do not flood');
+    require(voteTime >= 3600, 'Minimum vote time is 1 hour');
+    CharityProposal storage charity;
+    for (uint256 i = 0; i < nextcharityId; i++) {
+        charity = charityproposals[i];
+        if (charity.executed == false && charity.votes < 100 && charity.amount != 0) {
+            totalProposalsAmount = totalProposalsAmount - charity.amount;
+            charity.amount = 0;
+        }
+    }
+    require(IBEP20(DAOToken).balanceOf(address(this)) >= totalProposalsAmount + amount, 'Amount too big');
     charityproposals[nextcharityId] = CharityProposal(
       nextcharityId,
       name,
@@ -153,6 +164,7 @@ contract DAOCharityWallet {
       false
     );
     nextcharityId++;
+    totalProposalsAmount = totalProposalsAmount + amount;
   }
 
   function vote(uint charityId) external onlyHODLers() {
