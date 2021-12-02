@@ -67,24 +67,28 @@
 //                                                              ...-##*##%%%%#*#%@+ ..                                                           
 //                                                                 .=*##+#%%**%*=-.      
 
+/**
+ * DAO contract:
+ * 1. Collects charity money & allocate shares
+ * 2. Keep track of investor contributions with shares
+ * 3. Allow hodlers to transfer shares
+ * 4. allow hodlers proposals to be created and voted
+ * 5. execute successful charity proposals (i.e send money)
+ */
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.10;
 
-/**
- * DAO contract:
- * 1. Collects investors money (ether) & allocate shares
- * 2. Keep track of investor contributions with shares
- * 3. Allow investors to transfer shares
- * 4. allow investment proposals to be created and voted
- * 5. execute successful investment proposals (i.e send money)
- */
+interface IERC20 {
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address recipient, uint256 amount) external returns (bool);
+}
 
 contract DAO {
 
   uint public totalShares;
   uint public availableFunds;
-  uint public contributionEnd;
   uint public nextProposalId;
   uint public voteTime;
   uint public quorum;
@@ -100,13 +104,13 @@ contract DAO {
     bool executed;
   }
 
-  mapping(address => bool) public investors;
+  mapping(address => bool) public hodlers;
   mapping(address => uint) public shares;
   mapping(address => mapping(uint => bool)) public votes;
   mapping(uint => Proposal) public proposals;
   
-  modifier onlyInvestors() {
-    require(investors[msg.sender] == true, 'only investors');
+  modifier onlyhodlers() {
+    require(hodlers[msg.sender] == true, 'only hodlers');
     _;
   }
 
@@ -115,20 +119,11 @@ contract DAO {
     _;
   }
 
-  constructor(uint contributionTime, uint _voteTime, uint _quorum) {
+  constructor(uint _voteTime, uint _quorum) {
     require(_quorum > 0 && _quorum < 100, 'quorum must be between 0 and 100');
-    contributionEnd = block.timestamp + contributionTime;
     voteTime = _voteTime;
     quorum = _quorum;
     admin = msg.sender;
-  }
-
-  function contribute() payable external {
-    require(block.timestamp < contributionEnd, 'cannot contribute after contributionEnd');
-    investors[msg.sender] = true;
-    shares[msg.sender] += msg.value;
-    totalShares += msg.value;
-    availableFunds += msg.value;
   }
 
   function redeemShare(uint amount) external {
@@ -143,7 +138,7 @@ contract DAO {
     require(shares[msg.sender] >= amount, 'not enough shares');
     shares[msg.sender] -= amount;
     shares[to] += amount;
-    investors[to] = true;
+    hodlers[to] = true;
   }
 
   function createProposal(
@@ -151,7 +146,7 @@ contract DAO {
     uint amount,
     address payable recipient) 
     public 
-    onlyInvestors() {
+    onlyhodlers() {
     require(availableFunds >= amount, 'amount too big');
     proposals[nextProposalId] = Proposal(
       nextProposalId,
@@ -166,7 +161,7 @@ contract DAO {
     nextProposalId++;
   }
 
-  function vote(uint proposalId) external onlyInvestors() {
+  function vote(uint proposalId) external onlyhodlers() {
     Proposal storage proposal = proposals[proposalId];
     require(votes[msg.sender][proposalId] == false, 'investor can only vote once for a proposal');
     require(block.timestamp < proposal.end, 'can only vote until proposal end date');
