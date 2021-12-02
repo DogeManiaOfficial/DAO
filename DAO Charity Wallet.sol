@@ -180,7 +180,7 @@ contract DAOCharityWallet {
     CharityProposal storage charity = charityproposals[charityId];
     require(block.timestamp >= charity.end, 'Cannot execute charity before end date');
     require(charity.executed == false, 'Cannot execute charity already executed');
-    require(charity.votes >= 100, 'Cannot execute charity with below 100 votes');
+    require(charity.votes >= 420, 'Cannot execute charity with below 420 votes');
     charity.executed = true;
     IBEP20(DAOToken).transfer(charity.recipient, charity.amount);
   }
