@@ -1,5 +1,5 @@
 # DAO
-## A Decentralized Autonomous Organization Smart Contracts
+## Decentralized Autonomous Organization Smart Contracts
 
 ### DAO Charity Wallet
 
