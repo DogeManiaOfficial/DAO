@@ -188,6 +188,7 @@ contract DAOCharityWallet {
   }
 
   function buyDAOTokenForBNB () external {
+    require(address(this).balance > 0, "The contract balance must be greater than 0");
     address[] memory path = new address[](2);
     path[0] = pancakeswapV2Router.WETH();
     path[1] = DAOToken;
@@ -201,6 +202,7 @@ contract DAOCharityWallet {
   }
 
   function buyDAOTokenForToken (address token) external {
+    require(IBEP20(token).balanceOf(address(this)) > 0, "The contract balance must be greater than 0");
     address[] memory path = new address[](2);
     path[0] = token;
     path[1] = DAOToken;
