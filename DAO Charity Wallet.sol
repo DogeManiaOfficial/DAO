@@ -147,7 +147,7 @@ contract DAOCharityWallet {
     onlyHODLers() {
     require(amount > 0, 'Do not flood');
     require(voteTime >= 3600, 'Minimum vote time is 1 hour');
-    CharityProposal storage charity;
+    CharityProposal memory charity;
     for (uint256 i = 0; i < nextcharityId; i++) {
         charity = charityproposals[i];
         if (charity.executed == false && charity.votes < 100 && charity.amount != 0) {
