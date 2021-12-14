@@ -149,7 +149,7 @@ contract DAOCharityWallet {
     CharityProposal memory charity;
     for (uint256 i = 0; i < nextcharityId; i++) {
         charity = charityproposals[i];
-        if (charity.executed == false && charity.votes < 420 && charity.amount != 0) {
+        if (charity.executed == false && charity.votes < 420 && charity.amount != 0 && charity.end < block.timestamp) {
             totalProposalsAmount = totalProposalsAmount - charity.amount;
             charity.amount = 0;
         }
