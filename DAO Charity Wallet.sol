@@ -203,9 +203,10 @@ contract DAOCharityWallet {
 
   function buyDAOTokenForToken (address token) external {
     require(IBEP20(token).balanceOf(address(this)) > 0, "The contract balance must be greater than 0");
-    address[] memory path = new address[](2);
+    address[] memory path = new address[](3);
     path[0] = token;
-    path[1] = DAOToken;
+    path[1] = pancakeswapV2Router.WETH();
+    path[2] = DAOToken;
     IBEP20(token).approve(address(pancakeswapV2Router), IBEP20(token).balanceOf(address(this)));
     pancakeswapV2Router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
         IBEP20(token).balanceOf(address(this)),
