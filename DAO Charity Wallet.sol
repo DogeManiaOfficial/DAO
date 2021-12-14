@@ -123,12 +123,11 @@ contract DAOCharityWallet {
     bool executed;
   }
 
-  mapping(address => bool) public HODLers;
   mapping(address => mapping(uint => bool)) public votes;
   mapping(uint => CharityProposal) public charityproposals;
   
   modifier onlyHODLers() {
-    require(HODLers[msg.sender] == true, 'Only HODLers!');
+    require(IBEP20(DAOToken).balanceOf(msg.sender) >= 4200000000000, 'You must HODL at least 4200 DogeMania tokens');
     _;
   }
 
@@ -171,7 +170,6 @@ contract DAOCharityWallet {
 
   function vote(uint charityId) external onlyHODLers() {
     CharityProposal storage charity = charityproposals[charityId];
-    require(IBEP20(DAOToken).balanceOf(msg.sender) >= 4200000000000, 'You must HODL at least 4200 DogeMania tokens to vote');
     require(votes[msg.sender][charityId] == false, 'Each HODLer can only vote once for one charity');
     require(block.timestamp < charity.end, 'CharityProposal end date has passed');
     votes[msg.sender][charityId] = true;
